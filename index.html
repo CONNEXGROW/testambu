@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,14 +37,13 @@
             border-radius: 5px;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px; /* Add margin for spacing */
+            margin-top: 10px;
         }
         button:hover {
             background-color: #218838;
         }
         input[type="text"]:required {
             border-color: red;
-            color: red; /* Change text color to red */
         }
     </style>
 </head>
@@ -73,13 +71,38 @@
         // Function to get user's current location
         function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    document.getElementById('location').value = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
-                }, function() {
-                    alert("Unable to retrieve your location.");
-                });
+                console.log("Attempting to retrieve location...");
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        console.log("Location found:", position.coords.latitude, position.coords.longitude);
+                        document.getElementById('location').value = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
+                    },
+                    function(error) {
+                        // Specific error handling based on error code
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                alert("Permission denied. Please allow location access.");
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                alert("Location information is unavailable.");
+                                break;
+                            case error.TIMEOUT:
+                                alert("The request to get location timed out.");
+                                break;
+                            default:
+                                alert("An unknown error occurred while retrieving location.");
+                        }
+                        console.error("Geolocation error:", error);
+                    },
+                    {
+                        enableHighAccuracy: true, // Use high accuracy if available
+                        timeout: 10000,           // Set a timeout (10 seconds)
+                        maximumAge: 0             // Ensure we get a fresh position
+                    }
+                );
             } else {
                 alert("Geolocation is not supported by this browser.");
+                console.error("Geolocation not supported.");
             }
         }
 
@@ -97,6 +120,7 @@
             })
             .then(response => {
                 if (response.ok) {
+                    alert("Your ambulance booking was successful. You will now be directed to dial the emergency number.");
                     // Open dialer with specified phone number after form submission
                     window.location.href = 'tel:+919153079210';
                 } else {
